@@ -5,23 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class HealthRecord extends Model
+class Activity extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'pet_id',
         'type',
-        'value',
-        'recorded_at',
+        'description',
+        'duration_minutes',
+        'occurred_at',
+    ];
+
+    protected $casts = [
+        'occurred_at' => 'datetime',
     ];
 
     public function pet()
     {
         return $this->belongsTo(Pet::class);
     }
-
-    protected $casts = [
-        'recorded_at' => 'datetime',
-    ];
 }

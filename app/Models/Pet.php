@@ -13,8 +13,10 @@ class Pet extends Model
         'user_id',
         'name',
         'type',
+        'gender',
         'breed',
         'birthday',
+        'weight',
     ];
 
     public function user()
@@ -30,5 +32,10 @@ class Pet extends Model
     public function insuranceProfile()
     {
         return $this->hasOne(InsuranceProfile::class);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
     }
 }
