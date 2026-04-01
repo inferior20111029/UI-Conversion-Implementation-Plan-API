@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'ai_health' => [
+        'endpoint' => env('AI_HEALTH_ENDPOINT'),
+        'api_key' => env('AI_HEALTH_API_KEY'),
+        'timeout' => env('AI_HEALTH_TIMEOUT', 60),
+        'verify_ssl' => filter_var(env('AI_HEALTH_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
+    ],
+
 ];

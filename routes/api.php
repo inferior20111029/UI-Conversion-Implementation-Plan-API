@@ -1,13 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\Api\AffiliateController;
+use App\Http\Controllers\Api\AiHealthScanController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\HealthRecordController;
+use App\Http\Controllers\Api\PetController;
+use App\Http\Controllers\AiHealthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\PetController;
-use App\Http\Controllers\Api\HealthRecordController;
-use App\Http\Controllers\Api\AffiliateController;
-use App\Http\Controllers\Api\ActivityController;
-use App\Http\Controllers\Api\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +20,7 @@ use App\Http\Controllers\Api\DashboardController;
 // 公開路由
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/ai-health/analyze', [AiHealthController::class, 'analyze']);
 
 // 需認證路由
 Route::middleware('auth:sanctum')->group(function () {
@@ -26,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return response()->json([
             'success' => true,
-            'data' => $request->user()
+            'data' => $request->user(),
         ]);
     });
 
@@ -45,6 +48,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // 保險推薦 (依寵物風險分數匹配)
     Route::get('pets/{pet}/affiliates', [AffiliateController::class, 'recommend']);
     Route::post('affiliates/{affiliate}/click', [AffiliateController::class, 'logClick']);
+
+    Route::prefix('ai-health')->group(function () {
+        Route::post('/scans', [AiHealthScanController::class, 'store']);
+        Route::get('/scans/{id}', [AiHealthScanController::class, 'show']);
+    });
 });
 
 // 公開的合作夥伴清單（不需登入）

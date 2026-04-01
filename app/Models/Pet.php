@@ -38,4 +38,9 @@ class Pet extends Model
     {
         return $this->hasMany(Activity::class);
     }
+
+    public function aiHealthScans()
+    {
+        return $this->hasMany(AiHealthScan::class);
+    }
 }
