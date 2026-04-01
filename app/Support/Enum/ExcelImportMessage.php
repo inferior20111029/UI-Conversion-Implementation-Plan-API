@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Support\Enum;
+
+enum ExcelImportMessage: string
+{
+    case SUCCESS = '匯入成功';
+
+    case FAILS = '匯入失敗';
+    case FORMAT_ERROR = '匯入格式錯錯誤';
+}
