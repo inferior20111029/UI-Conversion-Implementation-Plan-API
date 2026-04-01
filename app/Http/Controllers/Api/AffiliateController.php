@@ -73,12 +73,14 @@ class AffiliateController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
+                'pet' => $pet,
+                'insurance_profile' => $profile,
+                'recommendations' => $recommendations,
                 'id' => $pet->id, // Frontend uses discount.id sometimes
                 'name' => $pet->name,
                 'risk_level' => $riskLevel,
                 'discount_percent' => $profile->premium_discount,
                 'unlock_actions' => $unlockActions,
-                'recommendations' => $recommendations,
             ],
         ]);
     }
