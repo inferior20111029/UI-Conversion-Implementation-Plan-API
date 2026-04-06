@@ -61,6 +61,8 @@ class InsurancePlanApiTest extends TestCase
             ->assertJsonPath('data.plans.0.id', $eligiblePlan->id)
             ->assertJsonPath('data.plans.0.provider_name', 'Alpha Pet Insurance')
             ->assertJsonPath('data.plans.0.badges.0', '犬適用')
+            ->assertJsonPath('data.plans.0.why_recommended.1', '符合品種條件')
+            ->assertJsonPath('data.plans.0.why_recommended.2', '命中保險公司偏好品種')
             ->assertJsonPath('data.meta.pet.breed', 'Shiba-Inu')
             ->assertJsonPath('data.meta.pet.has_microchip', true)
             ->assertJsonPath('data.meta.pet.is_registered', true)

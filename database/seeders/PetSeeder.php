@@ -26,7 +26,7 @@ class PetSeeder extends Seeder
             'name' => 'Bella',
             'type' => 'dog',
             'gender' => 'female',
-            'breed' => 'Golden Retriever',
+            'breed' => '黃金獵犬',
             'birthday' => '2021-05-20',
             'weight' => 28.5,
         ]);
@@ -54,7 +54,7 @@ class PetSeeder extends Seeder
             'name' => 'Milo',
             'type' => 'cat',
             'gender' => 'male',
-            'breed' => 'British Shorthair',
+            'breed' => '英國短毛貓',
             'birthday' => '2018-10-12',
             'weight' => 5.2,
         ]);

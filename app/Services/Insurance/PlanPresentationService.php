@@ -3,10 +3,11 @@
 namespace App\Services\Insurance;
 
 use App\Models\InsurancePlan;
+use App\Support\Pets\PetBreedMatcher;
 
 class PlanPresentationService
 {
-    public function listItem(InsurancePlan $plan, array $ranking): array
+    public function listItem(InsurancePlan $plan, array $ranking, ?string $petBreed = null): array
     {
         return [
             'id' => $plan->id,
@@ -24,11 +25,11 @@ class PlanPresentationService
             'sponsor_boost' => $ranking['sponsor_boost'],
             'score_breakdown' => $ranking['breakdown'] ?? [],
             'badges' => $this->badges($plan),
-            'why_recommended' => $this->whyRecommended($plan, $ranking),
+            'why_recommended' => $this->whyRecommended($plan, $ranking, $petBreed),
         ];
     }
 
-    public function detail(InsurancePlan $plan, ?array $ranking = null): array
+    public function detail(InsurancePlan $plan, ?array $ranking = null, ?string $petBreed = null): array
     {
         $coverageSummary = $plan->coverage_summary_snapshot;
         $comparison = $plan->comparison_snapshot;
@@ -62,7 +63,7 @@ class PlanPresentationService
             'claim_requirements' => $claimRequirements->toArray(),
             'score_breakdown' => $ranking['breakdown'] ?? null,
             'badges' => $this->badges($plan),
-            'why_recommended' => $this->whyRecommended($plan, $ranking),
+            'why_recommended' => $this->whyRecommended($plan, $ranking, $petBreed),
             'terms' => [
                 'url' => $plan->terms_url,
                 'source_updated_at' => $plan->source_updated_at?->toISOString(),
@@ -123,11 +124,12 @@ class PlanPresentationService
         return array_values(array_slice(array_unique($badges), 0, 5));
     }
 
-    public function whyRecommended(InsurancePlan $plan, ?array $ranking = null): array
+    public function whyRecommended(InsurancePlan $plan, ?array $ranking = null, ?string $petBreed = null): array
     {
         $messages = [];
         $coverageFlags = $plan->coverage_summary_snapshot->enabledFlags();
         $claimRequirements = array_filter($plan->claim_requirement_snapshot->toArray(), fn (mixed $value): bool => $value !== null);
+        $targetAudienceBreeds = array_values((array) ($plan->target_audience_snapshot['breeds_include'] ?? []));
 
         if ($ranking !== null && ($ranking['eligibility']['eligible'] ?? false)) {
             $messages[] = '符合寵物年齡與物種條件';
@@ -135,6 +137,16 @@ class PlanPresentationService
 
         if ($ranking !== null && ($ranking['eligibility']['eligible'] ?? false) && $plan->eligibility_snapshot->breedRules !== []) {
             $messages[] = '符合品種條件';
+        }
+
+        if (
+            $ranking !== null
+            && ($ranking['eligibility']['eligible'] ?? false)
+            && $petBreed !== null
+            && $targetAudienceBreeds !== []
+            && PetBreedMatcher::matches($targetAudienceBreeds, $petBreed)
+        ) {
+            $messages[] = '命中保險公司偏好品種';
         }
 
         if (count(array_filter($coverageFlags)) >= 2) {

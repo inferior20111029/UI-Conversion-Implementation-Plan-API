@@ -40,11 +40,11 @@ class InsurancePlanController extends Controller
             'success' => true,
             'data' => [
                 'plans' => collect($ranking['plans'])
-                    ->map(function (array $rankedPlan) use ($planMap, $planPresentationService): array {
+                    ->map(function (array $rankedPlan) use ($planMap, $planPresentationService, $pet): array {
                         /** @var InsurancePlan $plan */
                         $plan = $planMap->get($rankedPlan['plan_id']);
 
-                        return $planPresentationService->listItem($plan, $rankedPlan);
+                        return $planPresentationService->listItem($plan, $rankedPlan, $pet->breed);
                     })
                     ->values()
                     ->all(),
@@ -95,7 +95,7 @@ class InsurancePlanController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $planPresentationService->detail($insurancePlan, $ranking),
+            'data' => $planPresentationService->detail($insurancePlan, $ranking, $pet?->breed),
         ]);
     }
 }
