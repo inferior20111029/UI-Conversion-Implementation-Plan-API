@@ -1,66 +1,120 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Pet Health OS Consumer API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel BFF for the consumer-facing `pet-health-os` application.
 
-## About Laravel
+## Responsibilities
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+這個 repo 目前同時負責：
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- consumer auth、pets、dashboard、health records、AI health scan
+- 保費列表與方案詳情 API
+- 從 provider backend 批次同步 insurance catalog projection
+- 在本地重建 provider ranking logic，對 pet 做 eligibility filter 與排序
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+保費列表的主資料源已經改為 provider insurance plans，不再以 `affiliates` 當保險主列表來源。
 
-## Learning Laravel
+## Local Setup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```bash
+composer install
+touch database/database.sqlite
+cp .env.example .env
+php artisan key:generate
+php artisan migrate:fresh --seed
+php artisan serve --host=127.0.0.1 --port=8010
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+本機最穩定的開發方式是使用 SQLite。
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Provider Catalog Sync
 
-## Laravel Sponsors
+consumer app 不會在使用者 request-time 直打 provider backend，而是先同步為本地 projection。
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+需要設定：
 
-### Premium Partners
+```env
+PROVIDER_CATALOG_BASE_URL=http://127.0.0.1:8011/api/internal/v1
+PROVIDER_CATALOG_SYNC_TOKEN=sync-secret
+PROVIDER_CATALOG_SYNC_TIMEOUT=20
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+同步指令：
 
-## Contributing
+```bash
+php artisan insurance-catalog:sync
+php artisan insurance-catalog:sync --full
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+目前排程策略：
 
-## Code of Conduct
+- 每小時 incremental sync
+- 每日一次 full sync 做 reconciliation
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Insurance APIs
 
-## Security Vulnerabilities
+主要保費 endpoints：
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- `GET /api/pets/{pet}/insurance/plans`
+- `GET /api/insurance/plans/{insurancePlan}`
 
-## License
+List API 會：
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- 只回 `is_listable=true` 且 `source_status=active` 的方案
+- 根據 pet profile 做 eligibility filter
+- 在本地計算 ranking
+- 回傳 `final_score`、`ranking_position`、`score_breakdown`、`badges`、`why_recommended`
+
+Detail API 會回：
+
+- provider identity
+- pricing
+- eligibility
+- coverage summary
+- waiting period
+- exclusions
+- claim requirements
+- score breakdown
+- terms url
+
+## Seeded Demo Data
+
+執行 `php artisan migrate:fresh --seed` 後可用：
+
+- demo user：`testUser@email.com` / `password123`
+- demo pets：`Bella`、`Milo`
+
+當 provider backend 也完成 seed 並跑過 `insurance-catalog:sync --full` 後，consumer 端會同步出 marketplace catalog。
+
+目前 demo catalog 來源包含：
+
+- `Aurora PetCare Insurance`
+- `Summit Pet Mutual`
+- `Harbor Companion Insurance`
+
+對 `Bella` 目前可見的 marketplace 方案包含：
+
+- `Aurora Precision Care`
+- `Summit Total Care`
+- `Harbor Active Paws Plus`
+- `Summit Accident Shield`
+- `Aurora Everyday Flex`
+
+## Recommended Local Flow
+
+1. 啟動 provider backend：`pet-health-os-api`
+2. 啟動 consumer API：這個 repo
+3. 執行 `php artisan insurance-catalog:sync --full`
+4. 啟動前端 repo：`UI-Conversion-Implementation-Plan`
+5. 用 demo user 登入並打開 `/insurance`
+
+## Testing
+
+```bash
+php artisan test
+```
+
+和這次保費串接直接相關的測試：
+
+- `tests/Feature/Console/InsuranceCatalogSyncCommandTest.php`
+- `tests/Feature/Insurance/InsurancePlanApiTest.php`
+- `tests/Feature/Insurance/InsuranceRankingParityTest.php`

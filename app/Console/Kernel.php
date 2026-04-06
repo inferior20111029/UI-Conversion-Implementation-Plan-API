@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('insurance-catalog:sync')->hourly()->between('08:00', '20:00');
+        $schedule->command('insurance-catalog:sync --full')->dailyAt('02:00');
     }
 
     /**

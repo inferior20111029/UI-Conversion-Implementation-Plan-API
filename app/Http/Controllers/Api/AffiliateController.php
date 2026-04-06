@@ -78,6 +78,16 @@ class AffiliateController extends Controller
                 'risk_level' => $riskLevel,
                 'discount_percent' => $profile->premium_discount,
                 'unlock_actions' => $unlockActions,
+                'pet' => [
+                    'id' => $pet->id,
+                    'name' => $pet->name,
+                    'type' => $pet->type,
+                ],
+                'insurance_profile' => [
+                    'risk_score' => $profile->risk_score,
+                    'premium_discount' => $profile->premium_discount,
+                    'last_calculated_at' => $profile->last_calculated_at?->toISOString(),
+                ],
                 'recommendations' => $recommendations,
             ],
         ]);

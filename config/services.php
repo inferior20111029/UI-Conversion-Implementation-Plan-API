@@ -38,4 +38,10 @@ return [
         'verify_ssl' => filter_var(env('AI_HEALTH_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
     ],
 
+    'provider_catalog' => [
+        'base_url' => env('PROVIDER_CATALOG_BASE_URL', 'http://127.0.0.1:8000/api/internal/v1'),
+        'token' => env('PROVIDER_CATALOG_SYNC_TOKEN'),
+        'timeout_seconds' => env('PROVIDER_CATALOG_SYNC_TIMEOUT', 20),
+    ],
+
 ];

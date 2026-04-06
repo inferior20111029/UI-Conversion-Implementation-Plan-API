@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AiHealthScanController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\HealthRecordController;
+use App\Http\Controllers\Api\InsurancePlanController;
 use App\Http\Controllers\Api\PetController;
 use App\Http\Controllers\AiHealthController;
 use Illuminate\Http\Request;
@@ -48,6 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // 保險推薦 (依寵物風險分數匹配)
     Route::get('pets/{pet}/affiliates', [AffiliateController::class, 'recommend']);
     Route::post('affiliates/{affiliate}/click', [AffiliateController::class, 'logClick']);
+    Route::get('pets/{pet}/insurance/plans', [InsurancePlanController::class, 'index']);
+    Route::get('insurance/plans/{insurancePlan}', [InsurancePlanController::class, 'show']);
 
     Route::prefix('ai-health')->group(function () {
         Route::post('/scans', [AiHealthScanController::class, 'store']);

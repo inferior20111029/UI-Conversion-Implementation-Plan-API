@@ -54,7 +54,12 @@ return [
     |
     */
 
-    'url' => env('APP_URL', env('HOME_URL') . '/laravel-leasehold'),
+    'url' => env(
+        'APP_URL',
+        env('HOME_URL')
+            ? rtrim((string) env('HOME_URL'), '/') . '/laravel-leasehold'
+            : 'http://localhost'
+    ),
 
     'asset_url' => env('ASSET_URL', '/'),
 

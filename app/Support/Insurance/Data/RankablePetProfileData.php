@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Support\Insurance\Data;
+
+class RankablePetProfileData
+{
+    public function __construct(
+        public string $species,
+        public ?string $breed,
+        public ?string $birthDate,
+        public array $medicalHistory = [],
+        public array $chronicConditions = [],
+        public array $lifestyleTags = [],
+        public ?float $ownerBudgetMonthly = null,
+    ) {
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'species' => $this->species,
+            'breed' => $this->breed,
+            'birth_date' => $this->birthDate,
+            'medical_history' => $this->medicalHistory,
+            'chronic_conditions' => $this->chronicConditions,
+            'lifestyle_tags' => $this->lifestyleTags,
+            'owner_budget_monthly' => $this->ownerBudgetMonthly,
+        ];
+    }
+}

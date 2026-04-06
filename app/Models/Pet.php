@@ -19,6 +19,11 @@ class Pet extends Model
         'weight',
     ];
 
+    protected $casts = [
+        'birthday' => 'date',
+        'weight' => 'float',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
