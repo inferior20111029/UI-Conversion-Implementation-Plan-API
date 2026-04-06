@@ -18,6 +18,7 @@ class PetFactory extends Factory
             'type' => fake()->randomElement(['dog', 'cat']),
             'breed' => fake()->word(),
             'birthday' => fake()->dateTimeBetween('-12 years', '-1 year')->format('Y-m-d'),
+            'microchip_number' => fake()->optional()->bothify('MCP##########'),
         ];
     }
 }

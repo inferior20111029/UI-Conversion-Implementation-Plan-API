@@ -4,6 +4,7 @@ namespace App\Services\Insurance;
 
 use App\Models\InsurancePlan;
 use App\Support\Insurance\Data\RankablePetProfileData;
+use App\Support\Pets\PetBreedMatcher;
 use Carbon\Carbon;
 
 class EligibilityFilter
@@ -25,8 +26,12 @@ class EligibilityFilter
         }
 
         $eligibleBreeds = $coverageRule['eligible_breeds'] ?? $eligibility->breedRules;
-        if ($breed !== null && $eligibleBreeds !== [] && ! $this->containsNormalized($eligibleBreeds, $breed)) {
+        if ($breed !== null && $eligibleBreeds !== [] && ! PetBreedMatcher::matches((array) $eligibleBreeds, $breed)) {
             $reasonCodes[] = 'breed_not_supported';
+        }
+
+        if ($eligibility->requiresMicrochip === true && ! $petProfile->hasMicrochip) {
+            $reasonCodes[] = 'microchip_required';
         }
 
         $minAgeMonths = isset($coverageRule['min_age_months']) ? (int) $coverageRule['min_age_months'] : $eligibility->minAgeMonths;

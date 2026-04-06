@@ -100,6 +100,14 @@ class PlanPresentationService
             $badges[] = '指定獸醫院';
         }
 
+        if ($eligibility->requiresMicrochip === true) {
+            $badges[] = '需晶片';
+        }
+
+        if ($eligibility->breedRules !== []) {
+            $badges[] = '品種適配';
+        }
+
         if (($coverageFlags['liability'] ?? false) === true) {
             $badges[] = '含侵權責任';
         }
@@ -121,12 +129,20 @@ class PlanPresentationService
             $messages[] = '符合寵物年齡與物種條件';
         }
 
+        if ($ranking !== null && ($ranking['eligibility']['eligible'] ?? false) && $plan->eligibility_snapshot->breedRules !== []) {
+            $messages[] = '符合品種條件';
+        }
+
         if (count(array_filter($coverageFlags)) >= 2) {
             $messages[] = '保障內容完整';
         }
 
         if (count($claimRequirements) >= 2) {
             $messages[] = '理賠資料要求明確';
+        }
+
+        if ($plan->eligibility_snapshot->requiresMicrochip === true) {
+            $messages[] = '理賠與身份驗證可對應晶片資料';
         }
 
         if ($ranking !== null && ($ranking['sponsor_boost'] ?? 0) > 0) {

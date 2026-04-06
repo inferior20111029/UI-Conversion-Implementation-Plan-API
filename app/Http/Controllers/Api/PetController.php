@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Pet;
 use App\Http\Requests\StorePetRequest;
 use App\Http\Requests\UpdatePetRequest;
+use App\Support\Pets\PetInsuranceTypeResolver;
 use Illuminate\Http\Request;
 
 class PetController extends Controller
@@ -16,7 +17,7 @@ class PetController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $pets
+            'data' => $pets->map(fn (Pet $pet): array => $this->petPayload($pet))->values()->all(),
         ]);
     }
 
@@ -34,7 +35,7 @@ class PetController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Pet created successfully',
-            'data' => $pet->load('insuranceProfile')
+            'data' => $this->petPayload($pet->load('insuranceProfile'))
         ], 201);
     }
 
@@ -46,9 +47,9 @@ class PetController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $pet->load(['healthRecords' => function ($query) {
+            'data' => $this->petPayload($pet->load(['healthRecords' => function ($query) {
                 $query->latest('recorded_at')->take(5);
-            }, 'insuranceProfile'])
+            }, 'insuranceProfile']))
         ]);
     }
 
@@ -63,7 +64,7 @@ class PetController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Pet updated successfully',
-            'data' => $pet
+            'data' => $this->petPayload($pet->load('insuranceProfile'))
         ]);
     }
 
@@ -79,5 +80,15 @@ class PetController extends Controller
             'success' => true,
             'message' => 'Pet deleted successfully'
         ]);
+    }
+
+    private function petPayload(Pet $pet): array
+    {
+        $payload = $pet->toArray();
+        $payload['type_label'] = PetInsuranceTypeResolver::label($pet->type);
+        $payload['insurance_type'] = PetInsuranceTypeResolver::resolve($pet->type);
+        $payload['has_microchip'] = filled($pet->microchip_number);
+
+        return $payload;
     }
 }

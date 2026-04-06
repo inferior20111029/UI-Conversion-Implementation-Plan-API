@@ -7,6 +7,7 @@ use App\Models\InsurancePlan;
 use App\Models\Pet;
 use App\Services\Insurance\PlanPresentationService;
 use App\Services\Insurance\PlanRankingService;
+use App\Support\Pets\PetInsuranceTypeResolver;
 use Illuminate\Http\Request;
 
 class InsurancePlanController extends Controller
@@ -51,6 +52,16 @@ class InsurancePlanController extends Controller
                     'algorithm_version' => $ranking['algorithm_version'],
                     'catalog_version' => $catalogVersion,
                     'total' => count($ranking['plans']),
+                    'pet' => [
+                        'id' => $pet->id,
+                        'name' => $pet->name,
+                        'type' => $pet->type,
+                        'type_label' => PetInsuranceTypeResolver::label($pet->type),
+                        'breed' => $pet->breed,
+                        'microchip_number' => $pet->microchip_number,
+                        'has_microchip' => filled($pet->microchip_number),
+                        'insurance_type' => PetInsuranceTypeResolver::resolve($pet->type),
+                    ],
                 ],
             ],
         ]);

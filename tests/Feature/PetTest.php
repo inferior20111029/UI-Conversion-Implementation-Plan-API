@@ -46,11 +46,16 @@ class PetTest extends TestCase
                 'type' => 'dog',
                 'breed' => 'Labrador',
                 'birthday' => '2020-05-01',
+                'microchip_number' => 'mcp-123456789',
             ]);
 
         $response->assertStatus(201)
             ->assertJson(['success' => true])
-            ->assertJsonPath('data.name', 'Buddy');
+            ->assertJsonPath('data.name', 'Buddy')
+            ->assertJsonPath('data.type_label', '狗')
+            ->assertJsonPath('data.insurance_type.key', 'dog_insurance')
+            ->assertJsonPath('data.microchip_number', 'MCP-123456789')
+            ->assertJsonPath('data.has_microchip', true);
 
         $this->assertDatabaseHas('pets', ['name' => 'Buddy', 'user_id' => $this->user->id]);
         // Insurance Profile auto-created
@@ -95,10 +100,32 @@ class PetTest extends TestCase
         $pet = Pet::factory()->create(['user_id' => $this->user->id]);
 
         $response = $this->withHeaders($this->auth())
-            ->putJson("/api/pets/{$pet->id}", ['name' => 'Max Updated']);
+            ->putJson("/api/pets/{$pet->id}", [
+                'name' => 'Max Updated',
+                'microchip_number' => 'chip-0001',
+            ]);
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.name', 'Max Updated');
+            ->assertJsonPath('data.name', 'Max Updated')
+            ->assertJsonPath('data.microchip_number', 'CHIP-0001')
+            ->assertJsonPath('data.has_microchip', true);
+    }
+
+    public function test_updating_pet_type_updates_insurance_type_mapping(): void
+    {
+        $pet = Pet::factory()->create([
+            'user_id' => $this->user->id,
+            'type' => 'dog',
+        ]);
+
+        $response = $this->withHeaders($this->auth())
+            ->putJson("/api/pets/{$pet->id}", ['type' => 'cat']);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.type', 'cat')
+            ->assertJsonPath('data.type_label', '貓')
+            ->assertJsonPath('data.insurance_type.key', 'cat_insurance')
+            ->assertJsonPath('data.insurance_type.label', '貓用保險');
     }
 
     public function test_user_can_delete_pet(): void

@@ -27,8 +27,9 @@ class InsurancePlanApiTest extends TestCase
         $this->pet = Pet::factory()->create([
             'user_id' => $this->user->id,
             'type' => 'dog',
-            'breed' => 'Shiba Inu',
+            'breed' => 'Shiba-Inu',
             'birthday' => now()->subYears(4)->toDateString(),
+            'microchip_number' => 'DOG-123456',
         ]);
 
         HealthRecord::factory()->create([
@@ -58,7 +59,36 @@ class InsurancePlanApiTest extends TestCase
             ->assertJsonPath('data.plans.0.id', $eligiblePlan->id)
             ->assertJsonPath('data.plans.0.provider_name', 'Alpha Pet Insurance')
             ->assertJsonPath('data.plans.0.badges.0', '犬適用')
+            ->assertJsonPath('data.meta.pet.breed', 'Shiba-Inu')
+            ->assertJsonPath('data.meta.pet.has_microchip', true)
+            ->assertJsonPath('data.meta.pet.insurance_type.key', 'dog_insurance')
             ->assertJsonPath('data.meta.total', 1);
+    }
+
+    public function test_plan_requiring_microchip_is_filtered_out_when_pet_has_no_microchip(): void
+    {
+        $provider = InsuranceProvider::query()->create([
+            'source_provider_id' => 11,
+            'name' => 'Beta Pet Insurance',
+        ]);
+
+        $petWithoutChip = Pet::factory()->create([
+            'user_id' => $this->user->id,
+            'type' => 'dog',
+            'breed' => 'Shiba Inu',
+            'birthday' => now()->subYears(3)->toDateString(),
+            'microchip_number' => null,
+        ]);
+
+        $this->createInsurancePlan($provider, 103, 'Chip Required Plan', ['dog']);
+
+        $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+            ->getJson("/api/pets/{$petWithoutChip->id}/insurance/plans");
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(0, 'data.plans')
+            ->assertJsonPath('data.meta.pet.has_microchip', false);
     }
 
     public function test_plan_detail_returns_structured_sections_and_score_breakdown(): void

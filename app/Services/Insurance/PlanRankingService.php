@@ -6,6 +6,7 @@ use App\Models\InsurancePlan;
 use App\Models\Pet;
 use App\Support\Insurance\Data\RankablePetProfileData;
 use App\Support\Insurance\Data\RankablePlanSnapshotData;
+use App\Support\Pets\PetBreedMatcher;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -187,10 +188,10 @@ class PlanRankingService
             $scores[] = round(count($intersection) / count((array) $targetAudience['lifestyle_tags']), 2);
         }
 
-        if ($breed !== null && ($targetAudience['breeds_exclude'] ?? null) !== null && $this->containsNormalized((array) $targetAudience['breeds_exclude'], $breed)) {
+        if ($breed !== null && ($targetAudience['breeds_exclude'] ?? []) !== [] && PetBreedMatcher::matches((array) $targetAudience['breeds_exclude'], $breed)) {
             $scores[] = 0.1;
         } elseif ($breed !== null && ($targetAudience['breeds_include'] ?? null) !== null && ($targetAudience['breeds_include'] ?? []) !== []) {
-            $scores[] = $this->containsNormalized((array) $targetAudience['breeds_include'], $breed) ? 1.0 : 0.45;
+            $scores[] = PetBreedMatcher::matches((array) $targetAudience['breeds_include'], $breed) ? 1.0 : 0.45;
         }
 
         if (($coverageRule['waiting_period_days'] ?? null) !== null) {

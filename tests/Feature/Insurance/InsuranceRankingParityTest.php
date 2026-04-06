@@ -22,8 +22,9 @@ class InsuranceRankingParityTest extends TestCase
         $pet = Pet::factory()->create([
             'user_id' => $user->id,
             'type' => 'dog',
-            'breed' => 'Shiba Inu',
+            'breed' => 'Shiba-Inu',
             'birthday' => now()->subYears(4)->toDateString(),
+            'microchip_number' => 'DOG-987654',
         ]);
 
         HealthRecord::factory()->create([

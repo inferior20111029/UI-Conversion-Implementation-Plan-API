@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pet;
+use App\Support\Pets\PetInsuranceTypeResolver;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -71,6 +72,11 @@ class DashboardController extends Controller
                 'id' => $pet->id,
                 'name' => $pet->name,
                 'type' => $pet->type,
+                'type_label' => PetInsuranceTypeResolver::label($pet->type),
+                'insurance_type' => PetInsuranceTypeResolver::resolve($pet->type),
+                'breed' => $pet->breed,
+                'microchip_number' => $pet->microchip_number,
+                'has_microchip' => filled($pet->microchip_number),
                 'risk_profile' => [
                     'score' => $score,
                     'risk_level' => $riskLevel,

@@ -3,6 +3,7 @@
 namespace App\Support\Insurance\Data;
 
 use JsonSerializable;
+use App\Support\Pets\PetBreedMatcher;
 
 class EligibilitySnapshotData implements InsuranceDataObject, JsonSerializable
 {
@@ -43,11 +44,7 @@ class EligibilitySnapshotData implements InsuranceDataObject, JsonSerializable
 
     public function supportsBreed(?string $breed): bool
     {
-        if ($breed === null || $this->breedRules === []) {
-            return true;
-        }
-
-        return in_array(strtolower($breed), array_map('strtolower', $this->breedRules), true);
+        return PetBreedMatcher::matches($this->breedRules, $breed);
     }
 
     public function toArray(): array

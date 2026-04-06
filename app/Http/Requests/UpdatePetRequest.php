@@ -11,6 +11,21 @@ class UpdatePetRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('breed')) {
+            $this->merge([
+                'breed' => $this->normalizeNullableString($this->input('breed')),
+            ]);
+        }
+
+        if ($this->has('microchip_number')) {
+            $this->merge([
+                'microchip_number' => $this->normalizeNullableString($this->input('microchip_number'), true),
+            ]);
+        }
+    }
+
     public function rules()
     {
         return [
@@ -20,6 +35,18 @@ class UpdatePetRequest extends FormRequest
             'breed' => 'nullable|string|max:255',
             'birthday' => 'nullable|date',
             'weight' => 'nullable|numeric|min:0',
+            'microchip_number' => 'nullable|string|max:64',
         ];
+    }
+
+    private function normalizeNullableString(mixed $value, bool $uppercase = false): ?string
+    {
+        $normalized = trim((string) $value);
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        return $uppercase ? strtoupper($normalized) : $normalized;
     }
 }
