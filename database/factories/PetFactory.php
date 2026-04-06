@@ -12,6 +12,8 @@ class PetFactory extends Factory
 
     public function definition(): array
     {
+        $isRegistered = fake()->boolean(70);
+
         return [
             'user_id' => User::factory(),
             'name' => fake()->firstName(),
@@ -19,6 +21,8 @@ class PetFactory extends Factory
             'breed' => fake()->word(),
             'birthday' => fake()->dateTimeBetween('-12 years', '-1 year')->format('Y-m-d'),
             'microchip_number' => fake()->optional()->bothify('MCP##########'),
+            'is_registered' => $isRegistered,
+            'registration_number' => $isRegistered ? fake()->bothify('REG########') : null,
         ];
     }
 }

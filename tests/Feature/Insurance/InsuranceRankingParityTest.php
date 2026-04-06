@@ -25,6 +25,8 @@ class InsuranceRankingParityTest extends TestCase
             'breed' => 'Shiba-Inu',
             'birthday' => now()->subYears(4)->toDateString(),
             'microchip_number' => 'DOG-987654',
+            'is_registered' => true,
+            'registration_number' => 'DOG-REG-987654',
         ]);
 
         HealthRecord::factory()->create([

@@ -19,6 +19,8 @@ class DashboardTest extends TestCase
             'type' => 'cat',
             'breed' => 'Ragdoll',
             'microchip_number' => 'CAT-0001',
+            'is_registered' => true,
+            'registration_number' => 'CAT-REG-001',
         ]);
 
         $token = $user->createToken('test')->plainTextToken;
@@ -34,6 +36,8 @@ class DashboardTest extends TestCase
             ->assertJsonPath('data.breed', 'Ragdoll')
             ->assertJsonPath('data.microchip_number', 'CAT-0001')
             ->assertJsonPath('data.has_microchip', true)
+            ->assertJsonPath('data.is_registered', true)
+            ->assertJsonPath('data.registration_number', 'CAT-REG-001')
             ->assertJsonPath('data.insurance_type.key', 'cat_insurance')
             ->assertJsonPath('data.insurance_type.label', '貓用保險');
     }

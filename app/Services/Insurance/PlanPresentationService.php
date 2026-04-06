@@ -104,6 +104,10 @@ class PlanPresentationService
             $badges[] = '需晶片';
         }
 
+        if ($eligibility->requiresRegistration === true) {
+            $badges[] = '需寵登';
+        }
+
         if ($eligibility->breedRules !== []) {
             $badges[] = '品種適配';
         }
@@ -143,6 +147,10 @@ class PlanPresentationService
 
         if ($plan->eligibility_snapshot->requiresMicrochip === true) {
             $messages[] = '理賠與身份驗證可對應晶片資料';
+        }
+
+        if ($ranking !== null && ($ranking['eligibility']['eligible'] ?? false) && $plan->eligibility_snapshot->requiresRegistration === true) {
+            $messages[] = '符合寵物登記條件';
         }
 
         if ($ranking !== null && ($ranking['sponsor_boost'] ?? 0) > 0) {

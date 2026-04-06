@@ -33,6 +33,8 @@ class PetProfileNormalizer
             birthDate: $pet->birthday ? $pet->birthday->toDateString() : null,
             microchipNumber: $pet->microchip_number ? (string) $pet->microchip_number : null,
             hasMicrochip: filled($pet->microchip_number),
+            registrationNumber: $pet->registration_number ? (string) $pet->registration_number : null,
+            isRegistered: (bool) $pet->is_registered,
             medicalHistory: $medicalHistory,
             chronicConditions: [],
             lifestyleTags: $lifestyleTags,

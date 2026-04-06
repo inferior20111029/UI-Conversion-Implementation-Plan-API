@@ -60,6 +60,8 @@ class InsurancePlanController extends Controller
                         'breed' => $pet->breed,
                         'microchip_number' => $pet->microchip_number,
                         'has_microchip' => filled($pet->microchip_number),
+                        'registration_number' => $pet->registration_number,
+                        'is_registered' => (bool) $pet->is_registered,
                         'insurance_type' => PetInsuranceTypeResolver::resolve($pet->type),
                     ],
                 ],

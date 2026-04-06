@@ -18,11 +18,14 @@ class Pet extends Model
         'birthday',
         'weight',
         'microchip_number',
+        'is_registered',
+        'registration_number',
     ];
 
     protected $casts = [
         'birthday' => 'date',
         'weight' => 'float',
+        'is_registered' => 'boolean',
     ];
 
     public function user()

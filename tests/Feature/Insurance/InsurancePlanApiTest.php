@@ -30,6 +30,8 @@ class InsurancePlanApiTest extends TestCase
             'breed' => 'Shiba-Inu',
             'birthday' => now()->subYears(4)->toDateString(),
             'microchip_number' => 'DOG-123456',
+            'is_registered' => true,
+            'registration_number' => 'DOG-REG-123456',
         ]);
 
         HealthRecord::factory()->create([
@@ -61,6 +63,7 @@ class InsurancePlanApiTest extends TestCase
             ->assertJsonPath('data.plans.0.badges.0', '犬適用')
             ->assertJsonPath('data.meta.pet.breed', 'Shiba-Inu')
             ->assertJsonPath('data.meta.pet.has_microchip', true)
+            ->assertJsonPath('data.meta.pet.is_registered', true)
             ->assertJsonPath('data.meta.pet.insurance_type.key', 'dog_insurance')
             ->assertJsonPath('data.meta.total', 1);
     }
@@ -78,6 +81,8 @@ class InsurancePlanApiTest extends TestCase
             'breed' => 'Shiba Inu',
             'birthday' => now()->subYears(3)->toDateString(),
             'microchip_number' => null,
+            'is_registered' => true,
+            'registration_number' => 'DOG-REG-999',
         ]);
 
         $this->createInsurancePlan($provider, 103, 'Chip Required Plan', ['dog']);
@@ -89,6 +94,34 @@ class InsurancePlanApiTest extends TestCase
             ->assertJsonPath('success', true)
             ->assertJsonCount(0, 'data.plans')
             ->assertJsonPath('data.meta.pet.has_microchip', false);
+    }
+
+    public function test_plan_requiring_registration_is_filtered_out_when_pet_is_not_registered(): void
+    {
+        $provider = InsuranceProvider::query()->create([
+            'source_provider_id' => 12,
+            'name' => 'Gamma Pet Insurance',
+        ]);
+
+        $petWithoutRegistration = Pet::factory()->create([
+            'user_id' => $this->user->id,
+            'type' => 'dog',
+            'breed' => 'Shiba Inu',
+            'birthday' => now()->subYears(3)->toDateString(),
+            'microchip_number' => 'DOG-333333',
+            'is_registered' => false,
+            'registration_number' => null,
+        ]);
+
+        $this->createInsurancePlan($provider, 104, 'Registration Required Plan', ['dog']);
+
+        $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+            ->getJson("/api/pets/{$petWithoutRegistration->id}/insurance/plans");
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(0, 'data.plans')
+            ->assertJsonPath('data.meta.pet.is_registered', false);
     }
 
     public function test_plan_detail_returns_structured_sections_and_score_breakdown(): void

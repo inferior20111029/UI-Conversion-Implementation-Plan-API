@@ -88,6 +88,7 @@ class PetController extends Controller
         $payload['type_label'] = PetInsuranceTypeResolver::label($pet->type);
         $payload['insurance_type'] = PetInsuranceTypeResolver::resolve($pet->type);
         $payload['has_microchip'] = filled($pet->microchip_number);
+        $payload['is_registered'] = (bool) $pet->is_registered;
 
         return $payload;
     }

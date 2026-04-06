@@ -47,6 +47,8 @@ class PetTest extends TestCase
                 'breed' => 'Labrador',
                 'birthday' => '2020-05-01',
                 'microchip_number' => 'mcp-123456789',
+                'is_registered' => true,
+                'registration_number' => 'reg-0001',
             ]);
 
         $response->assertStatus(201)
@@ -55,7 +57,9 @@ class PetTest extends TestCase
             ->assertJsonPath('data.type_label', '狗')
             ->assertJsonPath('data.insurance_type.key', 'dog_insurance')
             ->assertJsonPath('data.microchip_number', 'MCP-123456789')
-            ->assertJsonPath('data.has_microchip', true);
+            ->assertJsonPath('data.has_microchip', true)
+            ->assertJsonPath('data.is_registered', true)
+            ->assertJsonPath('data.registration_number', 'REG-0001');
 
         $this->assertDatabaseHas('pets', ['name' => 'Buddy', 'user_id' => $this->user->id]);
         // Insurance Profile auto-created
@@ -103,12 +107,16 @@ class PetTest extends TestCase
             ->putJson("/api/pets/{$pet->id}", [
                 'name' => 'Max Updated',
                 'microchip_number' => 'chip-0001',
+                'is_registered' => true,
+                'registration_number' => 'reg-2026-01',
             ]);
 
         $response->assertStatus(200)
             ->assertJsonPath('data.name', 'Max Updated')
             ->assertJsonPath('data.microchip_number', 'CHIP-0001')
-            ->assertJsonPath('data.has_microchip', true);
+            ->assertJsonPath('data.has_microchip', true)
+            ->assertJsonPath('data.is_registered', true)
+            ->assertJsonPath('data.registration_number', 'REG-2026-01');
     }
 
     public function test_updating_pet_type_updates_insurance_type_mapping(): void

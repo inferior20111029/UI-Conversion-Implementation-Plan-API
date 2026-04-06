@@ -77,6 +77,8 @@ class DashboardController extends Controller
                 'breed' => $pet->breed,
                 'microchip_number' => $pet->microchip_number,
                 'has_microchip' => filled($pet->microchip_number),
+                'registration_number' => $pet->registration_number,
+                'is_registered' => (bool) $pet->is_registered,
                 'risk_profile' => [
                     'score' => $score,
                     'risk_level' => $riskLevel,

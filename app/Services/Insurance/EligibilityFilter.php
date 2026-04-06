@@ -34,6 +34,10 @@ class EligibilityFilter
             $reasonCodes[] = 'microchip_required';
         }
 
+        if ($eligibility->requiresRegistration === true && ! $petProfile->isRegistered) {
+            $reasonCodes[] = 'registration_required';
+        }
+
         $minAgeMonths = isset($coverageRule['min_age_months']) ? (int) $coverageRule['min_age_months'] : $eligibility->minAgeMonths;
         if ($minAgeMonths !== null && $ageMonths !== null && $ageMonths < $minAgeMonths) {
             $reasonCodes[] = 'below_minimum_age';
