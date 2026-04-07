@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\InsurancePlan;
 use App\Models\Pet;
+use App\Services\Insurance\CatalogAutoSyncService;
 use App\Services\Insurance\PlanPresentationService;
 use App\Services\Insurance\PlanRankingService;
 use App\Support\Pets\PetInsuranceTypeResolver;
@@ -15,12 +16,15 @@ class InsurancePlanController extends Controller
     public function index(
         Request $request,
         Pet $pet,
+        CatalogAutoSyncService $catalogAutoSyncService,
         PlanRankingService $planRankingService,
         PlanPresentationService $planPresentationService,
     ) {
         if ($pet->user_id !== $request->user()->id) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
+
+        $catalogAutoSyncService->refreshIfStale();
 
         $plans = InsurancePlan::query()
             ->with('provider')
@@ -72,9 +76,12 @@ class InsurancePlanController extends Controller
     public function show(
         Request $request,
         InsurancePlan $insurancePlan,
+        CatalogAutoSyncService $catalogAutoSyncService,
         PlanRankingService $planRankingService,
         PlanPresentationService $planPresentationService,
     ) {
+        $catalogAutoSyncService->refreshIfStale();
+
         if (! $insurancePlan->is_listable || $insurancePlan->source_status !== 'active') {
             return response()->json(['success' => false, 'message' => 'Insurance plan not found'], 404);
         }
