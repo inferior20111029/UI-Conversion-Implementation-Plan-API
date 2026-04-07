@@ -38,6 +38,15 @@ return [
         'verify_ssl' => filter_var(env('AI_HEALTH_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
     ],
 
+    'ai_doctor' => [
+        'provider' => env('AI_DOCTOR_PROVIDER', 'openai'),
+        'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('AI_DOCTOR_MODEL', 'gpt-5.4-mini'),
+        'timeout' => env('AI_DOCTOR_TIMEOUT', 45),
+        'verify_ssl' => filter_var(env('AI_DOCTOR_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
+    ],
+
     'provider_catalog' => [
         'base_url' => env('PROVIDER_CATALOG_BASE_URL', 'http://127.0.0.1:8000/api/internal/v1'),
         'token' => env('PROVIDER_CATALOG_SYNC_TOKEN'),
