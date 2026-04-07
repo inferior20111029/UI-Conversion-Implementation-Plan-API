@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AffiliateController;
+use App\Http\Controllers\Api\AiDoctorConsultationController;
 use App\Http\Controllers\Api\AiHealthScanController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
@@ -56,6 +57,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/scans', [AiHealthScanController::class, 'store']);
         Route::get('/scans/{id}', [AiHealthScanController::class, 'show']);
     });
+
+    Route::post('ai-doctor/consultations', [AiDoctorConsultationController::class, 'store']);
 });
 
 // 公開的合作夥伴清單（不需登入）
