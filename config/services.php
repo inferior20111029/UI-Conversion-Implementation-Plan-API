@@ -51,6 +51,7 @@ return [
         'base_url' => env('PROVIDER_CATALOG_BASE_URL', 'http://127.0.0.1:8000/api/internal/v1'),
         'token' => env('PROVIDER_CATALOG_SYNC_TOKEN'),
         'timeout_seconds' => env('PROVIDER_CATALOG_SYNC_TIMEOUT', 20),
+        'request_sync_cooldown_seconds' => env('PROVIDER_CATALOG_REQUEST_SYNC_COOLDOWN', 300),
     ],
 
 ];

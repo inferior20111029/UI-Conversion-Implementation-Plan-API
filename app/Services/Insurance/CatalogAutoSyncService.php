@@ -16,8 +16,9 @@ class CatalogAutoSyncService
     ) {
     }
 
-    public function refreshIfStale(int $cooldownSeconds = 15): void
+    public function refreshIfStale(?int $cooldownSeconds = null): void
     {
+        $cooldownSeconds ??= (int) config('services.provider_catalog.request_sync_cooldown_seconds', 300);
         $now = time();
         $lastRunAt = (int) Cache::get(self::LAST_RUN_CACHE_KEY, 0);
 

@@ -24,7 +24,7 @@ class InsurancePlanController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $catalogAutoSyncService->refreshIfStale();
+        $this->scheduleCatalogRefresh($catalogAutoSyncService);
 
         $plans = InsurancePlan::query()
             ->with('provider')
@@ -80,7 +80,7 @@ class InsurancePlanController extends Controller
         PlanRankingService $planRankingService,
         PlanPresentationService $planPresentationService,
     ) {
-        $catalogAutoSyncService->refreshIfStale();
+        $this->scheduleCatalogRefresh($catalogAutoSyncService);
 
         if (! $insurancePlan->is_listable || $insurancePlan->source_status !== 'active') {
             return response()->json(['success' => false, 'message' => 'Insurance plan not found'], 404);
@@ -104,5 +104,12 @@ class InsurancePlanController extends Controller
             'success' => true,
             'data' => $planPresentationService->detail($insurancePlan, $ranking, $pet?->breed),
         ]);
+    }
+
+    private function scheduleCatalogRefresh(CatalogAutoSyncService $catalogAutoSyncService): void
+    {
+        app()->terminating(static function () use ($catalogAutoSyncService): void {
+            $catalogAutoSyncService->refreshIfStale();
+        });
     }
 }
